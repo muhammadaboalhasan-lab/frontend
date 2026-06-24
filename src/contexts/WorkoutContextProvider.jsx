@@ -41,7 +41,7 @@ export const WorkoutContextProvider = ({ children }) => {
       try {
         setLoading(true);
         const response = await fetch(
-          `${import.meta.env.VITE_BACKEND_API_KEY}/workouts?search=${query.trim()}`,
+          `${import.meta.env.VITE_BACKEND_API_KEY}/workouts/search?name=${query.trim()}`,
           { signal },
         );
         if (!response.ok) {
@@ -58,19 +58,25 @@ export const WorkoutContextProvider = ({ children }) => {
     };
     searchWorkouts();
 
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+      setSearchResults([]);
+    };
   }, [query]);
 
   const addWorkout = async (workout) => {
     try {
       setLoading(true);
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_API_KEY}/workouts`, {
-        method: "POST",
-        body: JSON.stringify(workout),
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_API_KEY}/workouts`,
+        {
+          method: "POST",
+          body: JSON.stringify(workout),
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
       if (!response.ok) {
         throw new Error("Failed to add workout");
       }
