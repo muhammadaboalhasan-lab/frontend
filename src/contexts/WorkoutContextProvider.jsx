@@ -14,7 +14,7 @@ export const WorkoutContextProvider = ({ children }) => {
       try {
         setLoading(true);
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/workouts`,
+          `${import.meta.env.VITE_BACKEND_API_KEY}/workouts`,
         );
         if (!response.ok) {
           throw new Error("Failed to load workouts");
@@ -41,7 +41,7 @@ export const WorkoutContextProvider = ({ children }) => {
       try {
         setLoading(true);
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/workouts?search=${query.trim()}`,
+          `${import.meta.env.VITE_BACKEND_API_KEY}/workouts?search=${query.trim()}`,
           { signal },
         );
         if (!response.ok) {
@@ -64,7 +64,7 @@ export const WorkoutContextProvider = ({ children }) => {
   const addWorkout = async (workout) => {
     try {
       setLoading(true);
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/workouts`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_API_KEY}/workouts`, {
         method: "POST",
         body: JSON.stringify(workout),
         headers: {
@@ -88,7 +88,7 @@ export const WorkoutContextProvider = ({ children }) => {
   const deleteWorkout = async (id) => {
     try {
       setLoading(true);
-      await fetch(`${import.meta.env.VITE_API_URL}/workouts/${id}`, {
+      await fetch(`${import.meta.env.VITE_BACKEND_API_KEY}/workouts/${id}`, {
         method: "DELETE",
       });
       setWorkouts((workouts) =>
@@ -105,7 +105,7 @@ export const WorkoutContextProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/ai/generateWorkout`,
+        `${import.meta.env.VITE_BACKEND_API_KEY}/ai/generateWorkout`,
         {
           method: "POST",
           body: JSON.stringify({ prompt }),
