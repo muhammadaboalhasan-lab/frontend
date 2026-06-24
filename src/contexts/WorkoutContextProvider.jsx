@@ -16,8 +16,11 @@ export const WorkoutContextProvider = ({ children }) => {
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/workouts`,
         );
+        if (!response.ok) {
+          throw new Error("Failed to load workouts");
+        }
         const data = await response.json();
-        setWorkouts(data.workouts);
+        setWorkouts(data.workouts ?? []);
       } catch (error) {
         setError(error.message);
       } finally {
@@ -28,18 +31,26 @@ export const WorkoutContextProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    if (!query.trim()) {
+      return;
+    }
+
     const controller = new AbortController();
     const signal = controller.signal;
     const searchWorkouts = async () => {
       try {
         setLoading(true);
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/workouts?search=${query}`,
+          `${import.meta.env.VITE_API_URL}/workouts?search=${query.trim()}`,
           { signal },
         );
+        if (!response.ok) {
+          throw new Error("Failed to search workouts");
+        }
         const data = await response.json();
-        setSearchResults(data.workouts);
+        setSearchResults(data.workouts ?? []);
       } catch (error) {
+        if (error.name === "AbortError") return;
         setError(error.message);
       } finally {
         setLoading(false);
@@ -56,9 +67,17 @@ export const WorkoutContextProvider = ({ children }) => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/workouts`, {
         method: "POST",
         body: JSON.stringify(workout),
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
+      if (!response.ok) {
+        throw new Error("Failed to add workout");
+      }
       const data = await response.json();
-      setWorkouts((workouts) => [...workouts, data.workout]);
+      if (data.workout) {
+        setWorkouts((workouts) => [...workouts, data.workout]);
+      }
     } catch (error) {
       setError(error.message);
     } finally {
@@ -72,6 +91,9 @@ export const WorkoutContextProvider = ({ children }) => {
       await fetch(`${import.meta.env.VITE_API_URL}/workouts/${id}`, {
         method: "DELETE",
       });
+      setWorkouts((workouts) =>
+        workouts.filter((workout) => workout.id !== id),
+      );
     } catch (error) {
       setError(error.message);
     } finally {
@@ -79,19 +101,26 @@ export const WorkoutContextProvider = ({ children }) => {
     }
   };
 
-  const aiGenerateDescription = async (workout) => {
+  const aiGenerateDescription = async (prompt) => {
     try {
       setLoading(true);
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/ai/generateWorkout`,
         {
           method: "POST",
-          body: JSON.stringify(workout),
+          body: JSON.stringify({ prompt }),
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
       );
+      if (!response.ok) {
+        throw new Error("Failed to generate description");
+      }
       const data = await response.json();
       setAiGeneratedDescription(data.description);
     } catch (error) {
+      if (error.name === "AbortError") return;
       setError(error.message);
     } finally {
       setLoading(false);
@@ -110,6 +139,8 @@ export const WorkoutContextProvider = ({ children }) => {
         addWorkout,
         deleteWorkout,
         setQuery,
+        setError,
+        setAiGeneratedDescription,
         aiGenerateDescription,
       }}
     >
