@@ -1,4 +1,5 @@
 import { Trash2 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { useWorkout } from "@/hooks/useWorkout";
 import { LoadingOverlay } from "@/components/Spinner/Spinner";
 import { workoutCardStyle as s } from "./workoutCardStyle";
@@ -27,7 +28,9 @@ function WorkoutCard({ workout, deletable = true }) {
         )}
       </div>
       <span className={s.badge}>{workout.muscleGroup}</span>
-      <p className={s.description}>{workout.description}</p>
+      <div className={s.description}>
+        <ReactMarkdown>{workout.description}</ReactMarkdown>
+      </div>
     </article>
   );
 }
